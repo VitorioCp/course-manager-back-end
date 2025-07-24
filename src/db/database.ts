@@ -18,4 +18,15 @@ export async function initDb() {
       password TEXT NOT NULL
     )
   `);
+
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS courses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      titulo TEXT NOT NULL,
+      desc TEXT NOT NULL,
+      horas INTEGER NOT NULL,
+      img TEXT NOT NULL,
+      status TEXT CHECK(status IN ('ativo', 'inativo')) NOT NULL
+    )
+  `);
 }

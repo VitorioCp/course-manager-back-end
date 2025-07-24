@@ -1,22 +1,25 @@
 import express from "express";
 import authRoutes from "./routes/auth.routes";
-import privateRoutes from "./routes/auth.routes";
+import coursesRoutes from "./routes/courses.routes";
 import { initDb } from "./db/database";
 import { config } from "./config/env";
 import cors from "cors";
+
 const app = express();
 
 app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json());
 
 app.use("/auth", authRoutes);
-app.use("/private", privateRoutes);
+app.use("/courses", coursesRoutes);
 
 app.get("/", (req, res) => res.send("API estruturada com REST"));
 
