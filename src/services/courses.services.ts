@@ -1,61 +1,39 @@
-import { openDb } from "../db/database";
+import prisma from "../db/prisma";
+import { CourseCreateData, CourseUpdateData } from "../types/course";
 
-interface CourseUpdateData {
-  titulo?: string;
-  desc?: string;
-  horas?: number;
-  img?: string;
-  status?: string;
-}
+
 
 export async function getCourses() {
-  const db = await openDb();
-  const courses = await db.all("SELECT * FROM courses");
-  return courses;
+  return prisma.courses.findMany();
 }
 
-export async function createCourse(course: {
-  titulo: string;
-  desc: string;
-  horas: number;
-  img: string;
-  status: string;
-}) {
-  const db = await openDb();
-  const result = await db.run(
-    `INSERT INTO courses (titulo, desc, horas, img, status) VALUES (?, ?, ?, ?, ?)`,
-    [course.titulo, course.desc, course.horas, course.img, course.status]
-  );
-  return {
-    id: result.lastID,
-    ...course,
-  };
+export async function getCoursesPublic() {
+  return prisma.courses.findMany({
+    where: {
+      status: 'ativo'
+    }
+  });
+}
+
+export async function createCourse(course: CourseCreateData) {
+  return prisma.courses.create({
+    data: course
+  });
 }
 
 export async function deleteCourse(id: number) {
-  const db = await openDb();
-  const result = await db.run("DELETE FROM courses WHERE id = ?", [id]);
-  return result.changes;
+  return prisma.courses.delete({
+    where: { id }
+  });
 }
 
-export async function updateCourseById(id: string, data: CourseUpdateData) {
-  const db = await openDb();
+export async function updateCourseById(id: number, data: CourseUpdateData) {
+  const updateData = Object.fromEntries(
+    Object.entries(data).filter(([_, value]) => value !== undefined)
+  ) as CourseUpdateData;
 
-  const keys = Object.keys(data).filter(
-    (key) => data[key as keyof CourseUpdateData] !== undefined
-  );
-
-  if (keys.length === 0) return null;
-
-  const fields = keys.map((key) => `${key} = ?`).join(", ");
-  const values = keys.map((key) => data[key as keyof CourseUpdateData]);
-  values.push(id);
-
-  const query = `UPDATE courses SET ${fields} WHERE id = ?`;
-  const result = await db.run(query, values);
-
-  if (result.changes === 0) return null;
-
-  const updatedCourse = await db.get("SELECT * FROM courses WHERE id = ?", id);
-  return updatedCourse;
+  return prisma.courses.update({
+    where: { id },
+    data: updateData
+  });
 }
