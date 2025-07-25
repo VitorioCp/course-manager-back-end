@@ -1,9 +1,9 @@
 import express from "express";
 import authRoutes from "./routes/auth.routes";
 import coursesRoutes from "./routes/courses.routes";
-import { initDb } from "./db/database";
 import { config } from "./config/env";
 import cors from "cors";
+import prisma from "./db/prisma";
 
 const app = express();
 
@@ -23,8 +23,18 @@ app.use("/courses", coursesRoutes);
 
 app.get("/", (req, res) => res.send("API estruturada com REST"));
 
-initDb().then(() => {
-  app.listen(config.port, () => {
-    console.log(`Servidor rodando em http://localhost:${config.port}`);
-  });
-});
+async function startServer() {
+  try {
+    await prisma.$connect();
+    console.log("✅ Conexão com o banco estabelecida");
+
+    app.listen(config.port, () => {
+      console.log(`🚀 Servidor rodando em http://localhost:${config.port}`);
+    });
+  } catch (error) {
+    console.error("Erro ao conectar ao banco:", error);
+    process.exit(1);
+  }
+}
+
+startServer();
