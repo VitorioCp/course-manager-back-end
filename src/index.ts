@@ -9,7 +9,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000","https://course-manager-front-end-main.vercel.app/"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -21,8 +21,9 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/courses", coursesRoutes);
 
-app.get("/", (req, res) => res.send("API estruturada com REST"));
-
+app.get("/", (req, res) => {
+  res.send("Bem-vindo ao Course Manager API!");
+});
 async function startServer() {
   try {
     await prisma.$connect();
